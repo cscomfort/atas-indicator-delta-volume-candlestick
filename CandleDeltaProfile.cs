@@ -44,11 +44,16 @@ public class CandleDeltaProfile : Indicator
     //   DeltaColor - POC bar filled solid in the candle's overall delta color
     //                (blue > 0, red < 0, white if flat); tracks live delta until close.
     //   Highlight  - POC bar keeps the white gradient; a translucent gold box is laid
-    //                over it, padded PocPadPx on each side (matches the reference image).
+    //                over it, with padding that scales with the bar width.
     private enum PocStyle { DeltaColor, Highlight }
     private static readonly PocStyle PocMode = PocStyle.Highlight;
     private static readonly Color PocHighlight = Color.FromArgb(94, 0xFF, 0xD1, 0x3C); // ~37% #FFD13C, measured from reference
-    private const int PocPadPx = 10;
+
+    // Highlight padding = PocPadRatio x zone width, clamped to [PocMinPadPx, PocMaxPadPx].
+    // 0.07 is the reference image's proportion (10px pad on a ~140px-wide profile).
+    private const double PocPadRatio = 0.07;
+    private const int PocMinPadPx = 2;
+    private const int PocMaxPadPx = 10;
 
     // Smallest zone width worth drawing (3 zones => 9px of content).
     private const int MinZonePx = 3;
@@ -202,15 +207,16 @@ public class CandleDeltaProfile : Indicator
         }
 
         // Highlight POC: translucent gold box over the POC bar (drawn last, so it tints the
-        // bar and any neighboring rows it covers, as in the reference). Vertical padding is
-        // PocPadPx; horizontal padding shrinks so the box never covers the candle body or
-        // reaches past the midpoint of the gap to the next bar.
+        // bar and any neighboring rows it covers, as in the reference). Padding scales with
+        // the zone width; horizontally it also shrinks so the box never covers the candle
+        // body or reaches past the midpoint of the gap to the next bar.
         if (!colorPoc && pocW > 0)
         {
-            var padX = Math.Min(PocPadPx, Math.Min(candleRight - (bodyX + bodyW) - 1, gap / 2 - 1));
+            var pad = Math.Clamp((int)Math.Round(zone * PocPadRatio), PocMinPadPx, PocMaxPadPx);
+            var padX = Math.Min(pad, Math.Min(candleRight - (bodyX + bodyW) - 1, gap / 2 - 1));
             if (padX < 0) padX = 0;
             ctx.FillRectangle(PocHighlight,
-                new Rectangle(candleRight - padX, pocY - PocPadPx, pocW + 2 * padX, h + 2 * PocPadPx));
+                new Rectangle(candleRight - padX, pocY - pad, pocW + 2 * padX, h + 2 * pad));
         }
     }
 
