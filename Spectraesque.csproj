@@ -13,6 +13,7 @@
     <Reference Include="ATAS.DataFeedsCore"><HintPath>$(AtasDir)/ATAS.DataFeedsCore.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Utils.Common"><HintPath>$(AtasDir)/Utils.Common.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="OFT.Rendering"><HintPath>$(AtasDir)/OFT.Rendering.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="OFT.Attributes"><HintPath>$(AtasDir)/OFT.Attributes.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
 
   <Target Name="DeployToAtas" AfterTargets="Build">
